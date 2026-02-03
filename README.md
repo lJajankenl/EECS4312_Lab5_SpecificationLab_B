@@ -1,6 +1,6 @@
 ## TODO:
-## Student Name:
-## Student ID: 
+## Student Name: George Yousif
+## Student ID: 215554413
 
 # Is Resource Allocation Feasible Lab Repository
 
