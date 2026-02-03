@@ -1,10 +1,102 @@
-## Student Name:
-## Student ID: 
+## Student Name: George Yousif
+## Student ID: 215554413
 
-Prompt 1: "Copy paste your question"
-LLM Response 1: "Copy paste LLMs response"
+Prompt 1: Help me implement this function.  
+LLM Response 1: from typing import Dict, List, Union
+import math
+
+Number = Union[int, float]
+
+
+def is_allocation_feasible(
+    resources: Dict[str, Number],
+    requests: List[Dict[str, Number]]
+) -> bool:
+    """
+    Determine whether a set of resource requests can be satisfied given limited capacities.
+
+    Rules/constraints handled:
+    - Any request for a resource that does not exist in `resources` => infeasible
+    - Negative, NaN, or infinite capacities/requests => infeasible
+    - Sum of requests for each resource must not exceed its capacity
+    - Requests may omit resources (treated as 0 usage)
+    """
+
+    # Basic type/validity checks for resources
+    if resources is None or requests is None:
+        return False
+
+    for r_name, cap in resources.items():
+        if not isinstance(r_name, str) or r_name == "":
+            return False
+        if not isinstance(cap, (int, float)):
+            return False
+        if math.isnan(cap) or math.isinf(cap) or cap < 0:
+            return False
+
+    # Aggregate demand per resource
+    demand: Dict[str, float] = {name: 0.0 for name in resources}
+
+    for req in requests:
+        if not isinstance(req, dict):
+            return False
+
+        for r_name, amount in req.items():
+            # Requesting a resource we don't have
+            if r_name not in resources:
+                return False
+
+            if not isinstance(amount, (int, float)):
+                return False
+            if math.isnan(amount) or math.isinf(amount) or amount < 0:
+                return False
+
+            demand[r_name] += float(amount)
+
+            # Early exit if we already exceed capacity
+            if demand[r_name] > float(resources[r_name]):
+                return False
+
+    return True
+
 
 --------------------------------------------------
-Prompt 2: "Copy paste your question"
-LLM Response 2: "Copy paste LLMs response"
+Prompt 2: Please help me write 5 tests cases.  
+LLM Response 2: 
+def test_empty_requests_is_feasible():
+    # No requests means nothing to allocate => always feasible (assuming resources are valid)
+    resources = {'cpu': 5, 'mem': 10}
+    requests = []
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_request_can_omit_some_resources():
+    # Requests don't have to mention every resource; omitted resources mean 0 usage
+    resources = {'cpu': 5, 'mem': 10}
+    requests = [{'cpu': 2}, {'mem': 3}]
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_float_amounts_boundary_feasible():
+    # Floats are allowed; total exactly equal to capacity should still be feasible
+    resources = {'cpu': 1.5}
+    requests = [{'cpu': 0.5}, {'cpu': 1.0}]
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_negative_request_amount_raises():
+    # Negative resource amounts are invalid input => should raise ValueError
+    resources = {'cpu': 5}
+    requests = [{'cpu': -1}]
+    with pytest.raises(ValueError):
+        is_allocation_feasible(resources, requests)
+
+
+def test_non_numeric_request_amount_raises():
+    # Non-numeric resource amounts are invalid => should raise ValueError
+    resources = {'cpu': 5}
+    requests = [{'cpu': "two"}]
+    with pytest.raises(ValueError):
+        is_allocation_feasible(resources, requests)
+
 --------------------------------------------------

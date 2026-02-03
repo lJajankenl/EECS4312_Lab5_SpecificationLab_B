@@ -1,5 +1,5 @@
-## Student Name:
-## Student ID: 
+## Student Name: George Yousif
+## Student ID: 215554413
 
 """
 Public test suite for the meeting slot suggestion exercise.
@@ -45,4 +45,38 @@ def test_non_dict_request_raises():
     with pytest.raises(ValueError):
         is_allocation_feasible(resources, requests)
 
-"""TODO: Add at least 5 additional test cases to test your implementation."""
+def test_empty_requests_is_feasible():
+    # No requests means nothing to allocate => always feasible (assuming resources are valid)
+    resources = {'cpu': 5, 'mem': 10}
+    requests = []
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_request_can_omit_some_resources():
+    # Requests don't have to mention every resource; omitted resources mean 0 usage
+    resources = {'cpu': 5, 'mem': 10}
+    requests = [{'cpu': 2}, {'mem': 3}]
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_float_amounts_boundary_feasible():
+    # Floats are allowed; total exactly equal to capacity should still be feasible
+    resources = {'cpu': 1.5}
+    requests = [{'cpu': 0.5}, {'cpu': 1.0}]
+    assert is_allocation_feasible(resources, requests) is True
+
+
+def test_negative_request_amount_raises():
+    # Negative resource amounts are invalid input => should raise ValueError
+    resources = {'cpu': 5}
+    requests = [{'cpu': -1}]
+    with pytest.raises(ValueError):
+        is_allocation_feasible(resources, requests)
+
+
+def test_non_numeric_request_amount_raises():
+    # Non-numeric resource amounts are invalid => should raise ValueError
+    resources = {'cpu': 5}
+    requests = [{'cpu': "two"}]
+    with pytest.raises(ValueError):
+        is_allocation_feasible(resources, requests)
